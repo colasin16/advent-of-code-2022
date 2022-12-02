@@ -10,30 +10,24 @@ pub fn execute() {
 
     if let Ok(lines) = read_lines(file_path) {
 
-        let mut elf_calories: Vec<i16> = Vec::new();
-        let mut current_elf_meals: Vec<i16> = Vec::new();
-        println!("About to start loop");
+        let mut elf_calories: Vec<i32> = Vec::new();
+        let mut current_elf_snacks: Vec<i32> = Vec::new();
 
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
-            match line {
-                Ok(l) => l,
-                Err(e) => e,
-            }
-            // if let Ok(calories) = line {
-            //     current_elf_meals.push(calories.parse().unwrap());
-            //     println!("{}", calories);
-            // } else {
-            //     let arr_func = |acc, x| acc + x;
-            //     let total_calories = current_elf_meals.iter().fold(0, arr_func);
-            //     elf_calories.push(total_calories);
-            //     current_elf_meals = Vec::new();
-            // }
+            if let Ok(snack_calories) = line {
+                if snack_calories.parse::<i32>().is_ok() {
+                    current_elf_snacks.push(snack_calories.parse().unwrap());
+                } else {
+                    let total_calories = current_elf_snacks.iter().fold(0, |acc, current| acc + current);
+                    elf_calories.push(total_calories);
+                    current_elf_snacks.clear();
+                }
+            } 
         }
-        println!("Hello, world!");
 
         elf_calories.sort();
-        println!("Most calories are {}", elf_calories[0]);
+        println!("Most calories are {}", elf_calories.last().unwrap());
     }
 }
 
