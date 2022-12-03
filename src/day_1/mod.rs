@@ -13,13 +13,12 @@ pub fn execute() {
         let mut elf_calories: Vec<i32> = Vec::new();
         let mut current_elf_snacks: Vec<i32> = Vec::new();
 
-        // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(snack_calories) = line {
                 if snack_calories.parse::<i32>().is_ok() {
                     current_elf_snacks.push(snack_calories.parse().unwrap());
                 } else {
-                    let total_calories = current_elf_snacks.iter().fold(0, |acc, current| acc + current);
+                    let total_calories = current_elf_snacks.iter().fold(0, accumulator_sum);
                     elf_calories.push(total_calories);
                     current_elf_snacks.clear();
                 }
@@ -27,7 +26,22 @@ pub fn execute() {
         }
 
         elf_calories.sort();
-        println!("Most calories are {}", elf_calories.last().unwrap());
+
+        if let Some(top_elf_calories) = elf_calories.last() {
+            
+            println!("The Elf carrying the most calories has {} calories", top_elf_calories);
+
+            let mut top_three_calories: Vec<i32> = Vec::new();
+            for i in [1,2,3] {
+                if let Some(calories) = elf_calories.get(elf_calories.len() - i) {
+                    top_three_calories.push(i32::clone(calories));
+                }
+            }
+            
+            let total_top_three_calories = top_three_calories.iter().fold(0, accumulator_sum);
+        
+            println!("The top three Elves are carrying a total of {} calories", total_top_three_calories);
+        }        
     }
 }
 
@@ -35,4 +49,8 @@ fn read_lines<P>(filename: P) -> Result<Lines<BufReader<File>>>
 where P: AsRef<Path>, {
     let file = File::open(filename)?;
     Ok(BufRead::lines(BufReader::new(file)))
+}
+
+fn accumulator_sum(acc: i32, current: &i32) -> i32 {
+    acc + current
 }
