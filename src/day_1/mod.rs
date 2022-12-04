@@ -1,14 +1,9 @@
-use std::fs::File;
-use std::io::Result;
-use std::io::Lines;
-use std::io::BufReader;
-use std::io::BufRead;
-use std::path::Path;
+use crate::helpers::file_system::read_file_lines;
 
-pub fn execute() {
-    let file_path: &Path = Path::new("src/day_1/input.txt");
+pub fn execute(input: &str) {
+    println!("Day 1 ------");
 
-    if let Ok(lines) = read_lines(file_path) {
+    if let Ok(lines) = read_file_lines(input) {
 
         let mut elf_calories: Vec<i32> = Vec::new();
         let mut current_elf_snacks: Vec<i32> = Vec::new();
@@ -43,12 +38,6 @@ pub fn execute() {
             println!("The top three Elves are carrying a total of {} calories", total_top_three_calories);
         }        
     }
-}
-
-fn read_lines<P>(filename: P) -> Result<Lines<BufReader<File>>>
-where P: AsRef<Path>, {
-    let file = File::open(filename)?;
-    Ok(BufRead::lines(BufReader::new(file)))
 }
 
 fn accumulator_sum(acc: i32, current: &i32) -> i32 {
