@@ -3,6 +3,7 @@ mod day_2;
 mod helpers;
 
 fn main() {
-   day_1::execute("src/day_1/input.txt");
-   day_2::execute("src/day_2/input.txt");
+    println!("Advent of Code");
+    day_1::execute("src/day_1/input.txt");
+    day_2::execute("src/day_2/input.txt");
 }

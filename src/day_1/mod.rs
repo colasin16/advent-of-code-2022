@@ -1,10 +1,12 @@
-use crate::helpers::file_system::read_file_lines;
+use crate::helpers::{
+    advent_headings::{print_day, print_part},
+    file_system::read_file_lines,
+};
 
 pub fn execute(input: &str) {
-    println!("Day 1 ------");
+    print_day(1);
 
     if let Ok(lines) = read_file_lines(input) {
-
         let mut elf_calories: Vec<i32> = Vec::new();
         let mut current_elf_snacks: Vec<i32> = Vec::new();
 
@@ -17,26 +19,34 @@ pub fn execute(input: &str) {
                     elf_calories.push(total_calories);
                     current_elf_snacks.clear();
                 }
-            } 
+            }
         }
 
         elf_calories.sort();
 
         if let Some(top_elf_calories) = elf_calories.last() {
-            
-            println!("The Elf carrying the most calories has {} calories", top_elf_calories);
+            print_part(
+                1,
+                format!("Elf with most calories has {} calories", top_elf_calories),
+            );
 
             let mut top_three_calories: Vec<i32> = Vec::new();
-            for i in [1,2,3] {
+            for i in [1, 2, 3] {
                 if let Some(calories) = elf_calories.get(elf_calories.len() - i) {
                     top_three_calories.push(i32::clone(calories));
                 }
             }
-            
+
             let total_top_three_calories = top_three_calories.iter().fold(0, accumulator_sum);
-        
-            println!("The top three Elves are carrying a total of {} calories", total_top_three_calories);
-        }        
+
+            print_part(
+                2,
+                format!(
+                    "Top three Elves are carrying a total of {} calories",
+                    total_top_three_calories
+                ),
+            );
+        }
     }
 }
 

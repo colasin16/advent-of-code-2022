@@ -1,8 +1,8 @@
 use std::fs::File;
-use std::io::Result;
-use std::io::Lines;
-use std::io::BufReader;
 use std::io::BufRead;
+use std::io::BufReader;
+use std::io::Lines;
+use std::io::Result;
 use std::path::Path;
 
 pub fn read_file_lines(filename: &str) -> Result<Lines<BufReader<File>>> {
