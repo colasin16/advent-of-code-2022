@@ -21,6 +21,7 @@ pub fn execute(input: &str) {
     ];
 
     if let Ok(lines) = read_file_lines(input) {
+        let mut cargo_stacks_copy = cargo_stacks.clone();
         for line in lines {
             if let Ok(instructions_text) = line {
                 let instructions: Vec<&str> = instructions_text.split(" ").collect();
@@ -33,9 +34,10 @@ pub fn execute(input: &str) {
 
                 if amount.is_ok() && from.is_ok() && to.is_ok() {
                     for m in 0..amount.unwrap() {
-                        if let Some(first) = cargo_stacks[from.to_owned().unwrap() - 1].pop_front()
+                        if let Some(first) =
+                            cargo_stacks_copy[from.to_owned().unwrap() - 1].pop_front()
                         {
-                            cargo_stacks[to.to_owned().unwrap() - 1].push_front(first);
+                            cargo_stacks_copy[to.to_owned().unwrap() - 1].push_front(first);
                         }
                     }
                 }
@@ -46,6 +48,47 @@ pub fn execute(input: &str) {
             1,
             format!(
                 "The first crate for all stacks are: {}{}{}{}{}{}{}{}{}",
+                cargo_stacks_copy[0].front().unwrap(),
+                cargo_stacks_copy[1].front().unwrap(),
+                cargo_stacks_copy[2].front().unwrap(),
+                cargo_stacks_copy[3].front().unwrap(),
+                cargo_stacks_copy[4].front().unwrap(),
+                cargo_stacks_copy[5].front().unwrap(),
+                cargo_stacks_copy[6].front().unwrap(),
+                cargo_stacks_copy[7].front().unwrap(),
+                cargo_stacks_copy[8].front().unwrap(),
+            ),
+        );
+    }
+
+    if let Ok(lines) = read_file_lines(input) {
+        for line in lines {
+            if let Ok(instructions_text) = line {
+                let instructions: Vec<&str> = instructions_text.split(" ").collect();
+
+                let (amount, from, to) = (
+                    instructions[1].parse::<usize>(),
+                    instructions[3].parse::<usize>(),
+                    instructions[5].parse::<usize>(),
+                );
+
+                if amount.is_ok() && from.is_ok() && to.is_ok() {
+                    let crates_to_move = cargo_stacks[from.to_owned().unwrap() - 1]
+                        .drain(0..amount.to_owned().unwrap())
+                        .collect::<VecDeque<char>>();
+
+                    crates_to_move
+                        .iter()
+                        .rev()
+                        .for_each(|c| cargo_stacks[to.to_owned().unwrap() - 1].push_front(*c));
+                }
+            }
+        }
+
+        print_part(
+            2,
+            format!(
+                "The first crate for all stacks using CrateMover9001 are: {}{}{}{}{}{}{}{}{}",
                 cargo_stacks[0].front().unwrap(),
                 cargo_stacks[1].front().unwrap(),
                 cargo_stacks[2].front().unwrap(),
