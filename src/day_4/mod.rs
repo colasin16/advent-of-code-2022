@@ -49,7 +49,19 @@ pub fn execute(input: &str) {
             }
         }
 
-        print_part(1, amount_of_ranges_fully_overlapped.to_string());
-        print_part(2, amount_of_ranges_overlapped.to_string());
+        print_part(
+            1,
+            format!(
+                "Amount of fully overlapped assignments is {}",
+                amount_of_ranges_fully_overlapped.to_string()
+            ),
+        );
+        print_part(
+            2,
+            format!(
+                "Amount of overlapped assignments is {}",
+                amount_of_ranges_overlapped.to_string()
+            ),
+        );
     }
 }
