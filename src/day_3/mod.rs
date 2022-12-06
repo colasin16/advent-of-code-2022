@@ -7,26 +7,54 @@ use crate::helpers::{
 
 pub fn execute(input: &str) {
     print_day(3);
+    {
+        if let Ok(lines) = read_file_lines(input) {
+            let mut total_points: i32 = 0;
 
-    if let Ok(lines) = read_file_lines(input) {
-        let mut total_points: i32 = 0;
+            for line in lines {
+                if let Ok(rucksack) = line {
+                    let (first_compartment, second_compartment) =
+                        rucksack.split_at(rucksack.len() / 2);
+                    let repeated_item = first_compartment
+                        .chars()
+                        .find(|c| second_compartment.contains(*c));
 
-        for line in lines {
-            if let Ok(rucksack) = line {
-                let (first_compartment, second_compartment) = rucksack.split_at(rucksack.len() / 2);
-                let repeated_item = first_compartment
-                    .chars()
-                    .find(|c| second_compartment.contains(*c));
-
-                if let Some(item) = repeated_item {
-                    if let Ok(points) = i32::try_from(get_item_priority(&item)) {
-                        total_points.add_assign(points);
+                    if let Some(item) = repeated_item {
+                        if let Ok(points) = i32::try_from(get_item_priority(&item)) {
+                            total_points.add_assign(points);
+                        }
                     }
                 }
             }
-        }
 
-        print_part(1, format!("The sum of the priorities is {}", total_points));
+            print_part(1, format!("The sum of the priorities is {}", total_points));
+        }
+    }
+
+    if let Ok(lines) = read_file_lines(input) {
+        let mut total_points: i32 = 0;
+        let mut current_group: [String; 3] = [String::new(), String::new(), String::new()];
+
+        lines.enumerate().for_each(|(index, line)| {
+            if let Ok(rucksack) = line {
+                let i = (index + current_group.len()) % current_group.len();
+                current_group[i] = rucksack;
+
+                if i % current_group.len() == current_group.len() - 1 {
+                    let common_item_in_rucksacks = current_group[0].chars().find(|item| {
+                        current_group[1].contains(*item) && current_group[2].contains(*item)
+                    });
+
+                    if let Some(common_item) = common_item_in_rucksacks {
+                        if let Ok(points) = i32::try_from(get_item_priority(&common_item)) {
+                            total_points.add_assign(points);
+                        }
+                    }
+                }
+            }
+        });
+
+        print_part(2, format!("The sum of the priorities is {}", total_points));
     }
 }
 
