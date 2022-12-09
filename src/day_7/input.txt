@@ -1,0 +1,11 @@
+$ ls
+dir dcvzbqf
+23804 gsdpmrq.bsz
+24936 nfngbl.mcn
+178747 plw.frm
+$ cd dcvzbqf
+$ ls
+dir gfvl
+$ cd gfvl
+$ ls
+104564 dnbmm.bgc
