@@ -61,12 +61,7 @@ fn create_items(
             let parsed_size = file_size.parse::<i32>();
 
             if let Ok(size) = parsed_size {
-                if let Some(dir_size) = directory_map.get(current_path) {
-                    let size_to_add = dir_size + size;
-                    directory_map.insert(current_path.clone(), size_to_add);
-
-                    // update_directories_size()
-                }
+                update_directories_size(directory_map, current_path, &size);
             }
         }
     }
@@ -74,20 +69,10 @@ fn create_items(
 
 fn update_directories_size(
     directory_map: &mut BTreeMap<String, i32>,
-    current_directory: &String,
+    current_path: &String,
     size_to_add: &i32,
 ) {
-    // Update all parent directories sizes
-    if let Some(directory) = directory_map.get(current_directory) {
-        if size_to_add > directory {
-            println!("ERROR: A directory that already exists is iterated again with exactly same path but greater size");
-        }
-    } else {
-        println!("ERROR: Directory {} should exist", current_directory);
-        directory_map.insert(String::from(current_directory), 0);
-    }
-
-    let mut paths_to_update = current_directory.split('/').collect::<Vec<&str>>();
+    let mut paths_to_update = current_path.split('/').collect::<Vec<&str>>();
     let mut paths: Vec<String> = vec![];
     paths_to_update
         .clone()
