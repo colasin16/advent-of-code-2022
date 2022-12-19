@@ -9,8 +9,6 @@ pub fn execute(input: &str) {
     print_day(7);
 
     if let Ok(lines) = read_file_lines(input) {
-        let mut current_path = String::new();
-        let mut directory_map: BTreeMap<String, i32> = BTreeMap::new();
         let terminal_lines: Vec<Result<String, Error>> = lines.collect();
         let lines_text = terminal_lines.iter().map(|predicate| {
             if let Ok(p) = predicate {
@@ -20,95 +18,68 @@ pub fn execute(input: &str) {
             }
         });
 
-        let mut indexes_to_skip: Vec<usize> = vec![];
+        let mut current_path = String::new();
+        let mut directory_map: BTreeMap<String, i32> = BTreeMap::new();
+        directory_map.insert(String::from("/"), 0);
 
-        for (index, line) in lines_text.clone().enumerate() {
-            if indexes_to_skip.contains(&index) {
-                println!("Skipping line {}", index);
-            } else if line.eq("$ ls") {
-                println!("Command LS");
-                let position_next_command = lines_text
-                    .clone()
-                    .skip(index + 1)
-                    .position(|text| text.starts_with("$"));
-
-                match position_next_command {
-                    Some(pos) => {
-                        let (range_of_lines, _): (Vec<_>, Vec<_>) = lines_text
-                            .clone()
-                            .skip(index + 1)
-                            .enumerate()
-                            .partition(|(i, l)| i < &(&pos));
-
-                        indexes_to_skip.clear();
-                        for l in range_of_lines.clone().into_iter() {
-                            indexes_to_skip.push(l.0);
-                        }
-
-                        let mut ls_items = Vec::new();
-                        ls_items = range_of_lines
-                            .iter()
-                            .map(|(i, l)| String::from(l))
-                            .fold(Vec::new().as_mut(), |acc: &mut Vec<String>, value| {
-                                acc.push(value);
-                                acc
-                            })
-                            .to_vec();
-
-                        let mut directory_size = 0;
-
-                        create_items(&mut directory_map, &mut directory_size, ls_items.clone());
-                        update_directories_size(&mut directory_map, &current_path, &directory_size);
-                    }
-                    None => {
-                        let mut directory_size = 0;
-                        create_items(&mut directory_map, &mut directory_size, vec![line]);
-                        update_directories_size(&mut directory_map, &current_path, &directory_size);
-                    }
-                };
-            } else if line.starts_with("$ cd") {
-                change_current_path(&mut current_path, &line);
+        for line in lines_text.clone() {
+            if line.starts_with("$") {
+                if line.starts_with("$ cd") {
+                    change_current_path(&mut current_path, &line);
+                }
+            } else {
+                create_items(&mut directory_map, &mut current_path, line);
             }
         }
 
-        for dir in directory_map.iter() {
-            println!("Dir {} size: {}", dir.0, dir.1);
+        for (dir_path, size) in directory_map.iter() {
+            println!("Dir {} has size {}", dir_path, size);
         }
     }
 }
 
 fn create_items(
     directory_map: &mut BTreeMap<String, i32>,
-    dir_size: &mut i32,
-    dir_items: Vec<String>,
+    current_path: &mut String,
+    item: String,
 ) {
-    dir_items.iter().for_each(|item| {
-        if item.starts_with("dir") {
-            directory_map.insert(String::from(item), 0);
-            println!("Inserting NEW dir entry - {}", item);
-        } else {
-            let file: Vec<&str> = item.split(" ").collect();
+    let item_parts: Vec<&str> = item.split(" ").collect();
 
-            if file.len() == 2 {
-                let file_size = file[0].parse::<i32>();
+    if item.starts_with("dir") {
+        if let Some(dir_name) = item_parts.get(1) {
+            let mut path = current_path.clone();
 
-                if let Ok(size) = file_size {
-                    println!("Adding File to DIR SIZE");
-                    dir_size.add_assign(size);
+            if !path.eq("/") {
+                path.add_assign("/");
+            }
+            path.add_assign(dir_name);
+
+            directory_map.insert(path, 0);
+        }
+    } else {
+        if let Some(file_size) = item_parts.get(0) {
+            let parsed_size = file_size.parse::<i32>();
+
+            if let Ok(size) = parsed_size {
+                if let Some(dir_size) = directory_map.get(current_path) {
+                    let size_to_add = dir_size + size;
+                    directory_map.insert(current_path.clone(), size_to_add);
+
+                    // update_directories_size()
                 }
             }
         }
-    });
+    }
 }
 
 fn update_directories_size(
     directory_map: &mut BTreeMap<String, i32>,
     current_directory: &String,
-    directory_size: &i32,
+    size_to_add: &i32,
 ) {
     // Update all parent directories sizes
     if let Some(directory) = directory_map.get(current_directory) {
-        if directory_size > directory {
+        if size_to_add > directory {
             println!("ERROR: A directory that already exists is iterated again with exactly same path but greater size");
         }
     } else {
@@ -136,32 +107,25 @@ fn update_directories_size(
         paths.splice(0..1, [String::from("/")]);
     }
 
-    println!(
-        "Paths to update are: (length is {})",
-        paths_to_update.len().to_string()
-    );
-    for p in &paths {
-        println!("{}", p);
-    }
-
     directory_map
         .into_iter()
         .filter(|entry| paths.clone().into_iter().any(|p| entry.0.eq(&p)).to_owned())
         .for_each(|entry| {
-            println!("Current dir ({}) SIZE: {}", entry.0, entry.1);
-            entry.1.add_assign(directory_size);
-            println!("NEW dir ({}) SIZE: {}", entry.0, entry.1);
+            entry.1.add_assign(size_to_add);
         });
 }
 
 fn change_current_path(current_path: &mut String, command_line: &String) {
-    println!("Current Command is: {}", command_line);
     let command_args = command_line.split("cd ").collect::<Vec<&str>>();
-    println!("Current path is: {}", current_path);
     match command_args[1] {
         ".." => {
-            if let Some(new_path) = current_path.strip_suffix("/") {
-                current_path.clone_into(String::from(new_path).borrow_mut());
+            let mut path_parts: Vec<&str> = current_path.split_inclusive("/").collect();
+
+            path_parts.pop();
+            current_path.clone_from(&mut path_parts.join(""));
+
+            if current_path.len() > 1 {
+                current_path.pop();
             }
         }
         "/" => {
@@ -176,5 +140,4 @@ fn change_current_path(current_path: &mut String, command_line: &String) {
             }
         }
     };
-    println!("Edited path is: {}", current_path);
 }
