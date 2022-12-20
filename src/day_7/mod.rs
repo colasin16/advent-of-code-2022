@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, collections::BTreeMap, io::Error, ops::AddAssign};
+use std::{borrow::Borrow, collections::BTreeMap, io::Error, ops::AddAssign};
 
 use crate::helpers::{
     advent_headings::{print_day, print_part},
@@ -32,8 +32,47 @@ pub fn execute(input: &str) {
             }
         }
 
-        for (dir_path, size) in directory_map.iter() {
-            println!("Dir {} has size {}", dir_path, size);
+        let mut sum_dir_sizes = i32::from(0);
+        directory_map
+            .clone()
+            .into_iter()
+            .filter(|(_path, size)| size.le(&i32::from(100000)))
+            .fold(&mut sum_dir_sizes, |acc, value| {
+                acc.add_assign(value.1);
+                acc
+            });
+
+        print_part(
+            1,
+            format!(
+                "Sum of all directories with size lesser or equal to 100.000: {}",
+                sum_dir_sizes
+            ),
+        );
+
+        const FILE_SYSTEM_MAX_STORAGE: i32 = 70000000;
+        const UPDATE_SIZE: i32 = 30000000;
+
+        if let Some(main_dir) = directory_map.get("/") {
+            let current_free_space = FILE_SYSTEM_MAX_STORAGE - main_dir;
+            let space_needed_to_free_up = UPDATE_SIZE - current_free_space;
+
+            if space_needed_to_free_up.gt(i32::from(0).borrow()) {
+                let mut directories_that_can_be_deleted: Vec<(String, i32)> = vec![];
+                directory_map
+                    .iter()
+                    .filter(|entry| entry.1.ge(&space_needed_to_free_up))
+                    .fold(&mut directories_that_can_be_deleted, |acc, value| {
+                        acc.push((value.0.clone(), value.1.clone()));
+                        acc
+                    });
+
+                directories_that_can_be_deleted.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+
+                if let Some(dir_to_be_deleted) = directories_that_can_be_deleted.first() {
+                    print_part(2, dir_to_be_deleted.1.to_string());
+                }
+            }
         }
     }
 }
@@ -72,7 +111,7 @@ fn update_directories_size(
     current_path: &String,
     size_to_add: &i32,
 ) {
-    let mut paths_to_update = current_path.split('/').collect::<Vec<&str>>();
+    let paths_to_update = current_path.split('/').collect::<Vec<&str>>();
     let mut paths: Vec<String> = vec![];
     paths_to_update
         .clone()
