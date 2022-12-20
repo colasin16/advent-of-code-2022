@@ -33,7 +33,7 @@ pub fn execute(input: &str) {
                 );
 
                 if amount.is_ok() && from.is_ok() && to.is_ok() {
-                    for m in 0..amount.unwrap() {
+                    for _m in 0..amount.unwrap() {
                         if let Some(first) =
                             cargo_stacks_copy[from.to_owned().unwrap() - 1].pop_front()
                         {
