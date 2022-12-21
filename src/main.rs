@@ -5,6 +5,7 @@ mod day_4;
 mod day_5;
 mod day_6;
 mod day_7;
+mod day_8;
 mod helpers;
 
 fn main() {
@@ -16,4 +17,5 @@ fn main() {
     day_5::execute("src/day_5/input.txt");
     day_6::execute("src/day_6/input.txt");
     day_7::execute("src/day_7/input.txt");
+    day_8::execute("src/day_8/input.txt");
 }

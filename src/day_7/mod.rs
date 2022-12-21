@@ -70,7 +70,13 @@ pub fn execute(input: &str) {
                 directories_that_can_be_deleted.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
                 if let Some(dir_to_be_deleted) = directories_that_can_be_deleted.first() {
-                    print_part(2, dir_to_be_deleted.1.to_string());
+                    print_part(
+                        2,
+                        format!(
+                            "Size of the smallest directory to delete: {}",
+                            dir_to_be_deleted.1.to_string()
+                        ),
+                    );
                 }
             }
         }
